@@ -1,0 +1,161 @@
+package vpcisactoritemspanels;
+
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.sql.ResultSet;
+
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+
+import gui.Launcher;
+import gui.VpCISWindow;
+import vpcispanels.AllAbstractionLevelsPanel;
+import vpcispanels.TemplatePanel;
+import vpcisteamitemspanels.AddTeamPanel;
+import vpcisteamitemspanels.AllItemsPanel;
+import vpcisteamitemspanels.EditTeamPanel;
+
+public class AllActorsPanel extends TemplatePanel {
+
+	public AllActorsPanel() {
+		super("List of all Actors");
+
+		// hide the useless buttons
+		updateButton.hide();
+		deleteButton.hide();
+		cancelButton.hide();
+		okButton.hide();
+		/*
+		 * protected JButton addButton = new JButton("Add"); protected JButton
+		 * updateButton = new JButton("Update"); protected JButton deleteButton
+		 * = new JButton("Delete"); protected JButton cancelButton = new
+		 * JButton("Cancel"); protected JButton backButton = new
+		 * JButton("Back"); protected JButton okButton = new JButton("OK");
+		 * protected JButton editButton = new JButton("Edit");
+		 */
+		// showSystem message
+		// showSystemMessage("List of All Teams related to the Abstraction
+		// Level");
+
+		addButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				VpCISWindow.pVpCIS.remove(VpCISWindow.pVpCIS.addActorPanel);
+				AddActorPanel addActorPanel = new AddActorPanel();
+				VpCISWindow.pVpCIS.add(addActorPanel, "AddActorPanel");
+				VpCISWindow.pVpCIS.repaint();
+				VpCISWindow.pVpCIS.revalidate();
+				VpCISWindow.pVpCIS.cl.show(VpCISWindow.pVpCIS, "AddActorPanel");
+			}
+		});
+
+		editButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				VpCISWindow.pVpCIS.remove(VpCISWindow.pVpCIS.editActorPanel);
+				EditActorPanel editActorPanel = new EditActorPanel();
+				VpCISWindow.pVpCIS.add(editActorPanel, "EditActorPanel");
+				VpCISWindow.pVpCIS.repaint();
+				VpCISWindow.pVpCIS.revalidate();
+				VpCISWindow.pVpCIS.cl.show(VpCISWindow.pVpCIS, "EditActorPanel");
+			}
+		});
+
+		backButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				VpCISWindow.pVpCIS.remove(VpCISWindow.pVpCIS.allItemsPanel);
+				AllItemsPanel allItemsPanel = new AllItemsPanel();
+				VpCISWindow.pVpCIS.add(allItemsPanel, "AllItemsPanel");
+				VpCISWindow.pVpCIS.repaint();
+				VpCISWindow.pVpCIS.revalidate();
+				VpCISWindow.pVpCIS.cl.show(VpCISWindow.pVpCIS, "AllItemsPanel");
+			}
+		});
+
+		centerPanel.setLayout(new FlowLayout());
+
+		try {
+
+			Launcher.adbc.st = Launcher.adbc.conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+					ResultSet.CONCUR_UPDATABLE);
+			String request = String.format("SELECT * FROM Actor " + "WHERE idAbstractionLevel="
+					+ AllAbstractionLevelsPanel.idAbstractionLevelEntred + "");
+			// System.out.println(request);
+			Launcher.adbc.rs = Launcher.adbc.st.executeQuery(request);
+
+			ImageIcon actorIcon = new ImageIcon("icons//Actor.png");
+
+			if (!Launcher.adbc.rs.next()) {
+				centerPanel.add(new JLabel("No Actor found"));
+			} else {
+
+				// becuase we moved forward in the if statement above
+				Launcher.adbc.rs.previous();
+
+				while (Launcher.adbc.rs.next()) {
+					// show all Teams
+					// add mouseListener on each Label
+
+					int idActor = Launcher.adbc.rs.getInt("idActor");
+					// System.out.println(AbstractionLevelId);
+					String nameActor = Launcher.adbc.rs.getString("nameActor");
+					// System.out.println(AbstractionLevelName);
+					String quality = Launcher.adbc.rs.getString("quality");
+					final JLabel actorLabel = new JLabel(idActor + " : " + nameActor + " (" + quality + ")", actorIcon, JLabel.LEFT);
+					actorLabel.addMouseListener(new MouseListener() {
+
+						public void mouseClicked(MouseEvent arg0) {
+							// move to the AllAbstractionLevel but with
+							// restriction on idAbstractionLevel =
+							// idAbstractionLevel selected
+							// System.out.println("you clicked me");
+							/*
+							 * idAbstractionLevelEntred = AbstractionLevelId;
+							 * NameIdAbstractionLevelEntred =
+							 * AbstractionLevelName;
+							 * 
+							 * //go to AllItemsPanel
+							 * VpCISWindow.pVpCIS.remove(VpCISWindow.pVpCIS.
+							 * allItemsPanel); AllItemsPanel allItemsPanel = new
+							 * AllItemsPanel();
+							 * VpCISWindow.pVpCIS.add(allItemsPanel,
+							 * "AllItemsPanel"); VpCISWindow.pVpCIS.repaint();
+							 * VpCISWindow.pVpCIS.revalidate();
+							 * VpCISWindow.pVpCIS.cl.show(VpCISWindow.pVpCIS,
+							 * "AllItemsPanel");
+							 */
+						}
+
+						public void mouseEntered(MouseEvent arg0) {
+
+							// AbstractionLevelLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK,
+							// 2));
+						}
+
+						public void mouseExited(MouseEvent arg0) {
+
+							// AbstractionLevelLabel.setBorder(BorderFactory.createLineBorder(null,
+							// 0));
+						}
+
+						public void mousePressed(MouseEvent arg0) {
+
+						}
+
+						public void mouseReleased(MouseEvent arg0) {
+
+						}
+
+					});
+
+					centerPanel.add(actorLabel);
+
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+}
